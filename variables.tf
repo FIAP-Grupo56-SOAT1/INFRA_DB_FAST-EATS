@@ -1,8 +1,3 @@
-variable "engine" {
-  description = "The database engine"
-  type        = string
-  default     = "mysql"
-}
 variable "allocated_storage" {
   description = "The amount of allocated storage."
   type        = number
@@ -13,16 +8,7 @@ variable "storage_type" {
   type        = string
   default     = "gp2"
 }
-variable "username" {
-  description = "Username for the master DB user."
-  default     = "fiap56"
-  type        = string
-}
-variable "password" {
-  description = "password of the database"
-  default     = "fiapsoat1grupo56"
-  type        = string
-}
+
 variable "instance_class" {
   description = "The RDS instance class"
   default     = "db.t2.micro"
@@ -41,20 +27,5 @@ variable "engine_version" {
 variable "skip_final_snapshot" {
   description = "skip snapshot"
   default     = "true"
-  type        = string
-}
-variable "identifier" {
-  description = "The name of the RDS instance"
-  default     = "fasteatsdb"
-  type        = string
-}
-variable "port" {
-  description = "The port on which the DB accepts connections"
-  default     = "3306"
-  type        = number
-}
-variable "name" {
-  description = "The database name"
-  default     = "fasteatsdb"
   type        = string
 }
