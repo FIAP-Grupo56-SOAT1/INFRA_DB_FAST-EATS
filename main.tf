@@ -39,16 +39,25 @@ resource "aws_security_group" "rds_sg" {
 resource "aws_db_instance" "default" {
   allocated_storage      = var.allocated_storage
   storage_type           = var.storage_type
-  engine                 = var.engine
+  engine                 = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["engine"]
   engine_version         = var.engine_version
   instance_class         = var.instance_class
-  db_name                = var.name
-  username               = var.username
-  password               = var.password
-  port                   = var.port
-  identifier             = var.identifier
+  db_name                = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["dbname"]
+  username               = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["username"]
+  password               = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["password"]
+  port                   = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["port"]
+  identifier             = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["dbname"]
   parameter_group_name   = var.parameter_group_name
   skip_final_snapshot    = var.skip_final_snapshot
   publicly_accessible    = true
   vpc_security_group_ids = ["${aws_security_group.rds_sg.id}"]
 }
+
+data "aws_secretsmanager_secret" "mysql" {
+  name = "prod/soat1grupo56/MySQL"
+}
+
+data "aws_secretsmanager_secret_version" "mysql_credentials" {
+  secret_id = data.aws_secretsmanager_secret.mysql.id
+}
+
