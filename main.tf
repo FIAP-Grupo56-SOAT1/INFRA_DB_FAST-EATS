@@ -57,7 +57,7 @@ resource "aws_db_instance" "pedido" {
 }
 
 data "aws_secretsmanager_secret" "mysql" {
-  name = "prod/soat1grupo56/MySQL"
+  name = "prod/soat1grupo56/Pedido"
 }
 
 data "aws_secretsmanager_secret_version" "mysql_credentials" {
