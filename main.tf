@@ -19,8 +19,12 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "aws_default_vpc" "default_vpc" {
+}
+
 #create a security group for RDS Database Instance
 resource "aws_security_group" "rds_pedido_sg" {
+  vpc_id        = aws_default_vpc.default_vpc.id
   name = "rds_pedido_sg"
   ingress {
     from_port   = 3306
@@ -33,6 +37,34 @@ resource "aws_security_group" "rds_pedido_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "rds_pedido_sg"
+  }
+}
+
+# Provide references to your default subnets
+resource "aws_default_subnet" "default_subnet_a" {
+  # Use your own region here but reference to subnet 1a
+  availability_zone = "us-east-1a"
+}
+
+resource "aws_default_subnet" "default_subnet_b" {
+  # Use your own region here but reference to subnet 1b
+  availability_zone = "us-east-1b"
+}
+
+resource "aws_default_subnet" "default_subnet_c" {
+  # Use your own region here but reference to subnet 1b
+  availability_zone = "us-east-1c"
+}
+
+resource "aws_db_subnet_group" "feasteats_db_subnet_group" {
+  name = "feasteats-pedido-db-subnet-group"
+  #subnet_ids = [aws_default_subnet.default_subnet_a.id, aws_default_subnet.default_subnet_b.id, aws_default_subnet.default_subnet_c.id]
+  subnet_ids = [aws_default_subnet.default_subnet_a.id]
+  tags = {
+    Name = "feasteats-pedido-db-subnet-group"
   }
 }
 
@@ -50,6 +82,7 @@ resource "aws_db_instance" "pedido" {
   port                    = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["port"]
   identifier              = var.identifier
   parameter_group_name    = var.parameter_group_name
+  db_subnet_group_name    = aws_db_subnet_group.feasteats_db_subnet_group.name
   skip_final_snapshot     = var.skip_final_snapshot
   publicly_accessible     = true
   vpc_security_group_ids  = [aws_security_group.rds_pedido_sg.id]
