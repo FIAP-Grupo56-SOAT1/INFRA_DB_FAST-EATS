@@ -19,18 +19,16 @@ provider "aws" {
   region = "us-east-1"
 }
 
+resource "aws_default_vpc" "default_vpc" {
+}
+
 #create a security group for RDS Database Instance
 resource "aws_security_group" "rds_pedido_sg" {
+  vpc_id        = aws_default_vpc.default_vpc.id
   name = "rds_pedido_sg"
   ingress {
     from_port   = 3306
     to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 0
-    to_port     = 0
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -63,8 +61,8 @@ resource "aws_default_subnet" "default_subnet_c" {
 
 resource "aws_db_subnet_group" "feasteats_db_subnet_group" {
   name = "feasteats-pedido-db-subnet-group"
-  subnet_ids = [aws_default_subnet.default_subnet_a.id, aws_default_subnet.default_subnet_b.id, aws_default_subnet.default_subnet_c.id]
-
+  #subnet_ids = [aws_default_subnet.default_subnet_a.id, aws_default_subnet.default_subnet_b.id, aws_default_subnet.default_subnet_c.id]
+  subnet_ids = [aws_default_subnet.default_subnet_a.id]
   tags = {
     Name = "feasteats-pedido-db-subnet-group"
   }
