@@ -23,9 +23,9 @@ resource "aws_default_vpc" "default_vpc" {
 }
 
 #create a security group for RDS Database Instance
-resource "aws_security_group" "rds_pedido_sg" {
+resource "aws_security_group" "rds_sg" {
   vpc_id        = aws_default_vpc.default_vpc.id
-  name = "rds_pedido_sg"
+  name = "rds_bd_${var.nome-db-servico}_sg"
   ingress {
     from_port   = 3306
     to_port     = 3306
@@ -39,7 +39,7 @@ resource "aws_security_group" "rds_pedido_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "rds_pedido_sg"
+    Name = "rds_${var.nome-db-servico}_sg"
   }
 }
 
@@ -54,26 +54,27 @@ resource "aws_default_subnet" "default_subnet_b" {
   availability_zone = "us-east-1b"
 }
 
-resource "aws_default_subnet" "default_subnet_c" {
-  # Use your own region here but reference to subnet 1b
-  availability_zone = "us-east-1c"
-}
+#resource "aws_default_subnet" "default_subnet_c" {
+#  # Use your own region here but reference to subnet 1b
+#  availability_zone = "us-east-1c"
+#}
 
 resource "aws_db_subnet_group" "feasteats_db_subnet_group" {
-  name = "feasteats-pedido-db-subnet-group"
+  name = "feasteats-${var.nome-db-servico}-db-subnet-group"
   #subnet_ids = [aws_default_subnet.default_subnet_a.id, aws_default_subnet.default_subnet_b.id, aws_default_subnet.default_subnet_c.id]
-  subnet_ids = [aws_default_subnet.default_subnet_a.id]
+  subnet_ids = [aws_default_subnet.default_subnet_a.id,aws_default_subnet.default_subnet_b.id]
   tags = {
-    Name = "feasteats-pedido-db-subnet-group"
+    Name = "feasteats-${var.nome-db-servico}-db-subnet-group"
   }
 }
 
 
-resource "aws_db_instance" "pedido" {
+
+resource "aws_db_instance" "msyql_rds" {
 
   allocated_storage       = var.allocated_storage
   storage_type            = var.storage_type
-  engine                  = "mysql"
+  engine                  = var.engine
   engine_version          = var.engine_version
   instance_class          = var.instance_class
   db_name                 = jsondecode(data.aws_secretsmanager_secret_version.mysql_credentials.secret_string)["dbname"]
@@ -84,9 +85,10 @@ resource "aws_db_instance" "pedido" {
   parameter_group_name    = var.parameter_group_name
   db_subnet_group_name    = aws_db_subnet_group.feasteats_db_subnet_group.name
   skip_final_snapshot     = var.skip_final_snapshot
-  publicly_accessible     = true
-  vpc_security_group_ids  = [aws_security_group.rds_pedido_sg.id]
-  backup_retention_period = 0
+  publicly_accessible     = var.publicly_accessible
+  vpc_security_group_ids  = [aws_security_group.rds_sg.id]
+  backup_retention_period = var.backup_retention_period
+  multi_az = false
 }
 
 data "aws_secretsmanager_secret" "mysql" {
