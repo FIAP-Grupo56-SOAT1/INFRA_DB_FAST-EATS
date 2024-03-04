@@ -33,3 +33,20 @@ variable "skip_final_snapshot" {
 variable "identifier" {
   default = "mysql-pedido"
 }
+
+variable "backup_retention_period" {
+  default = 0
+}
+
+variable "engine" {
+  default = "mysql"
+}
+
+variable "nome-db-servico" {
+  default = "pedido"
+}
+
+variable "publicly_accessible" {
+  type = bool
+  default = true
+}
